@@ -4,7 +4,7 @@
 
 Run `npm ci` in `level-1-pilot` to install the browser client. From the PersonalCoach workspace, start the connected pilot with `node --env-file=level-1-pilot/.env.local level-1-pilot/server.mjs`. The settings file needs `SUPABASE_URL`, `SUPABASE_PUBLISHABLE_KEY`, and `COACH_OWNER_EMAIL`. The app also accepts Supabase's `NEXT_PUBLIC_`-prefixed names for the URL and publishable key.
 
-The Supabase project needs the quiz-progress migration, a confirmed Auth user for the owner email, and a Magic Link email template that includes the sign-in code via `{{ .Token }}`. Sign in using the same account on each device. A quiz save checks its revision before writing, so an older browser cannot overwrite newer progress. The original local mode remains available by starting without the settings file.
+The Supabase project needs the quiz-progress migration and email sign-in enabled. The configured owner address can create its app account on the first sign-in, subject to the project's Auth settings. Enter the email code or copy the original Supabase verification link into the pilot. Sign in using the same account on each device. A quiz save checks its revision before writing, so an older browser cannot overwrite newer progress. Start without the settings file for local mode.
 
 ## Local mode
 

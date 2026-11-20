@@ -20,8 +20,26 @@ export async function connectAccount(config) {
   return {
     async session() { return value(await client.auth.getSession()).session; },
     watch(change) { client.auth.onAuthStateChange((event, session) => change(event, session)); },
-    async sendCode(email) { value(await client.auth.signInWithOtp({ email, options: { shouldCreateUser: false } })); },
-    async verify(email, token) { return value(await client.auth.verifyOtp({ email, token, type: 'email' })).session; },
+    async verify(email, codeOrLink) {
+      let credentials = { email, token: codeOrLink, type: 'email' };
+      if (!/^\d{6,10}$/.test(codeOrLink)) {
+        let link;
+        try { link = new URL(codeOrLink); } catch { /* Validation below handles an invalid link. */ }
+        const type = link?.searchParams.get('type');
+        const tokenHash = link?.searchParams.get('token') ?? link?.searchParams.get('token_hash');
+        if (!link || link.origin !== config.supabaseUrl || link.pathname !== '/auth/v1/verify' ||
+            !['signup', 'magiclink', 'email'].includes(type) || !tokenHash) {
+          throw new Error('Enter the numeric code or copy the original Supabase verification link from your email.');
+        }
+        credentials = { token_hash: tokenHash, type };
+      }
+      const { session } = value(await client.auth.verifyOtp(credentials));
+      if (session?.user.email?.toLowerCase() !== email.toLowerCase()) {
+        if (session) await client.auth.signOut({ scope: 'local' });
+        throw new Error('This email verification does not match the email entered above.');
+      }
+      return session;
+    },
     async signOut() { value(await client.auth.signOut({ scope: 'local' })); },
     async progress() {
       return value(await client.from('coach_quiz_progress').select('choices,version').eq('quiz_id', quizId).maybeSingle())

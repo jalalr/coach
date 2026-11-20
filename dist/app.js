@@ -461,10 +461,10 @@ async function accountAction(event, action) {
 
 $('send-code').addEventListener('submit', event => accountAction(event, async () => {
   const email = $('email').value.trim();
-  await account.sendCode(email);
+  await request('/api/sign-in-email', { email });
   pendingEmail = email;
   $('verify-code').hidden = false;
-  $('account-status').textContent = 'Enter the sign-in code from your email.';
+  $('account-status').textContent = 'Enter the code from your email. If you received a link instead, copy it from the email and paste it here.';
   $('code').focus();
 }));
 $('verify-code').addEventListener('submit', event => accountAction(event, async () => {

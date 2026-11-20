@@ -14,7 +14,8 @@ const feedback = {
 const summary = 'The teachability index asks you to consider two things: how willing you are to learn, and how willing you are to accept change. You can be open to hearing feedback and still be reluctant to change a habit.';
 const exercise = 'Pick one skill you’re practising. Name a piece of feedback you’re open to hearing, then choose one small change you can try in your next practice session.';
 const recording = process.env.COACH_SOURCE_AUDIO ? resolve(process.env.COACH_SOURCE_AUDIO) : resolve(root, originalRecording);
-const recordingAvailable = existsSync(recording);
+const previewOrigin = process.env.COACH_PHONE_PREVIEW_ORIGIN?.trim();
+const recordingAvailable = !previewOrigin && existsSync(recording);
 const files = { '/': ['index.html', 'text/html'], '/styles.css': ['styles.css', 'text/css'], '/app.js': ['app.js', 'text/javascript'],
   '/account.js': ['account.js', 'text/javascript'] };
 const supabaseUrl = (process.env.SUPABASE_URL || process.env.NEXT_PUBLIC_SUPABASE_URL)?.trim().replace(/\/$/, '');
@@ -23,6 +24,9 @@ const ownerEmail = process.env.COACH_OWNER_EMAIL?.trim().toLowerCase();
 const accountConfig = supabaseUrl || publishableKey || ownerEmail ? { supabaseUrl, publishableKey } : null;
 if (accountConfig && (!/^https:\/\/[a-z0-9]+\.supabase\.co$/.test(supabaseUrl) || !publishableKey?.startsWith('sb_publishable_') || !ownerEmail)) {
   throw new Error('Set SUPABASE_URL, SUPABASE_PUBLISHABLE_KEY and COACH_OWNER_EMAIL together.');
+}
+if (previewOrigin && (!/^https:\/\/[a-z0-9-]+\.trycloudflare\.com$/.test(previewOrigin) || !accountConfig)) {
+  throw new Error('A phone preview requires Supabase sign-in and its exact HTTPS tunnel origin.');
 }
 
 async function authorize(request, response) {
@@ -124,6 +128,30 @@ async function readBody(request) {
   return JSON.parse(body);
 }
 
+async function sendSignInEmail(response, email) {
+  if (!accountConfig) return json(response, 404, { error: 'Sign-in is unavailable in local mode.' });
+  if (typeof email !== 'string' || email.trim().toLowerCase() !== ownerEmail) {
+    return json(response, 403, { error: 'Use the email configured for this private pilot.' });
+  }
+  try {
+    const upstream = await fetch(`${supabaseUrl}/auth/v1/otp`, {
+      method: 'POST',
+      headers: { apikey: publishableKey, 'Content-Type': 'application/json' },
+      body: JSON.stringify({ email: ownerEmail, create_user: true }),
+      signal: AbortSignal.timeout(12000),
+    });
+    if (upstream.ok) return json(response, 200, { sent: true });
+    const problem = await upstream.json();
+    if (upstream.status === 429) return json(response, 429, { error: 'Supabase is limiting sign-in emails. Wait a minute and try again.' });
+    if (['signup_disabled', 'otp_disabled', 'email_provider_disabled', 'email_address_not_authorized'].includes(problem.error_code)) {
+      return json(response, 422, { error: problem.msg || problem.message || 'Check the email settings in your Supabase project.' });
+    }
+    return json(response, 502, { error: 'Supabase could not send the sign-in email. Try again or check the project’s Auth logs.' });
+  } catch {
+    return json(response, 502, { error: 'Could not reach Supabase to send the sign-in email. Try again.' });
+  }
+}
+
 function audio(request, response) {
   const size = statSync(recording).size;
   const range = request.headers.range;
@@ -146,9 +174,12 @@ function audio(request, response) {
 
 const port = Number(process.env.PILOT_PORT || 4173);
 const authority = `127.0.0.1:${port}`;
+const publicAuthority = previewOrigin ? new URL(previewOrigin).host : null;
 createServer(async (request, response) => {
   response.setHeader('X-Content-Type-Options', 'nosniff');
-  if (request.headers.host !== authority || (request.headers.origin && request.headers.origin !== `http://${authority}`)) {
+  const allowedHost = request.headers.host === authority || request.headers.host === publicAuthority;
+  const allowedOrigin = !request.headers.origin || request.headers.origin === `http://${authority}` || request.headers.origin === previewOrigin;
+  if (!allowedHost || !allowedOrigin) {
     return json(response, 403, { error: 'Use the pilot’s local address.' });
   }
   if (request.method === 'GET') {
@@ -171,10 +202,11 @@ createServer(async (request, response) => {
       return;
     }
   }
-  if (request.method === 'POST' && ['/api/coach', '/api/grade', '/api/speech'].includes(request.url)) {
-    if (!await authorize(request, response)) return;
+  if (request.method === 'POST' && ['/api/sign-in-email', '/api/coach', '/api/grade', '/api/speech'].includes(request.url)) {
+    if (request.url !== '/api/sign-in-email' && !await authorize(request, response)) return;
     let body;
     try { body = await readBody(request); } catch { return json(response, 400, { error: 'Invalid request.' }); }
+    if (request.url === '/api/sign-in-email') return sendSignInEmail(response, body?.email);
     if (request.url === '/api/speech') return playSpeech(response, body?.id);
     if (request.url === '/api/coach' && typeof body?.question === 'string' && body.question.trim()) {
       const reply = coach(body.question.toLowerCase());

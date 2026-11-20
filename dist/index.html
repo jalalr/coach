@@ -13,8 +13,8 @@
   <main class="shell">
     <section id="sign-in" class="panel sign-in" aria-labelledby="sign-in-title" hidden>
       <h1 id="sign-in-title">Sign in</h1><p>Use your email to open the pilot and resume your quiz.</p>
-      <form id="send-code"><label for="email">Email address</label><div class="form-row"><input id="email" type="email" autocomplete="email" required><button class="primary">Send code</button></div></form>
-      <form id="verify-code" hidden><label for="code">Email code</label><div class="form-row"><input id="code" inputmode="numeric" autocomplete="one-time-code" pattern="[0-9]{6,10}" required><button class="primary">Sign in</button></div></form>
+      <form id="send-code"><label for="email">Email address</label><div class="form-row"><input id="email" type="email" autocomplete="email" required><button class="primary">Send sign-in email</button></div></form>
+      <form id="verify-code" hidden><label for="code">Email code or verification link</label><div class="form-row"><input id="code" autocomplete="one-time-code" autocapitalize="off" spellcheck="false" required><button class="primary">Sign in</button></div></form>
       <p id="account-status" class="status" role="status"></p>
     </section>
     <div id="course-view" hidden>
