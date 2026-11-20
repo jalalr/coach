@@ -1,0 +1,48 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#f6f6ef">
+  <title>Success Mastery | Level 1</title>
+  <link rel="stylesheet" href="/styles.css">
+  <script type="module" src="/app.js"></script>
+</head>
+<body>
+  <header class="site-header"><div class="shell topbar"><span class="brand"><span class="brand-mark" aria-hidden="true">✳</span> Success Mastery</span><span id="pilot-label" class="local-label">Local pilot</span><button id="sign-out" type="button" class="link" hidden>Sign out</button></div></header>
+  <main class="shell">
+    <section id="sign-in" class="panel sign-in" aria-labelledby="sign-in-title" hidden>
+      <h1 id="sign-in-title">Sign in</h1><p>Use your email to open the pilot and resume your quiz.</p>
+      <form id="send-code"><label for="email">Email address</label><div class="form-row"><input id="email" type="email" autocomplete="email" required><button class="primary">Send code</button></div></form>
+      <form id="verify-code" hidden><label for="code">Email code</label><div class="form-row"><input id="code" inputmode="numeric" autocomplete="one-time-code" pattern="[0-9]{6,10}" required><button class="primary">Sign in</button></div></form>
+      <p id="account-status" class="status" role="status"></p>
+    </section>
+    <div id="course-view" hidden>
+    <section class="hero" aria-labelledby="lesson-title">
+      <div class="hero-copy"><p class="eyebrow">Level 1 · Teachability</p><h1 id="lesson-title">Learn.<br>Then change.</h1><p id="summary">Loading lesson…</p></div>
+      <div class="hero-lines" aria-hidden="true"><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i></div>
+    </section>
+    <div class="source-row"><div><span class="source-label">From the course recording</span><p id="citation"></p></div><button id="source-play" class="secondary" type="button">Play excerpt</button><audio id="source-audio" preload="none"></audio></div>
+    <div class="grid" id="workspace" hidden>
+      <section class="panel coach" aria-labelledby="coach-title">
+        <div class="section-head"><h2 id="coach-title">Talk to your coach</h2><span class="mode">On-device voice</span></div>
+        <p class="muted">Ask about teachability, get an example, or try a practice exercise.</p>
+        <button id="hold" class="hold" type="button" aria-describedby="voice-status" disabled><span class="wave" aria-hidden="true">▂▅▇▅▂</span> <span id="hold-label">Hold to talk</span></button>
+        <div class="voice-controls"><button id="setup" class="link" type="button" hidden>Enable voice</button><button id="toggle-record" class="link" type="button" hidden>Start recording</button></div>
+        <p id="voice-status" class="status" role="status"></p>
+        <form id="ask-form"><label for="question">Your question</label><div class="form-row"><input id="question" placeholder="How can I practise this?" maxlength="350" required><button class="primary" type="submit">Ask</button></div></form>
+        <div id="answer" class="response" hidden><p id="reply" role="status"></p><button id="read-reply" class="link" type="button">Read reply aloud</button><p id="read-status" class="status" role="status"></p></div>
+        <details class="exercise"><summary>Practice exercise</summary><p id="exercise"></p></details>
+      </section>
+      <section class="panel quiz" aria-labelledby="quiz-title">
+        <div class="section-head"><h2 id="quiz-title">Quick quiz</h2><span id="quiz-position" class="mode"></span></div>
+        <progress id="quiz-progress" value="0" max="2" aria-label="Questions answered"></progress>
+        <div id="quiz-body"></div>
+        <p id="quiz-status" class="status" role="status"></p>
+      </section>
+    </div>
+    </div>
+    <p id="load-error" role="alert" hidden></p>
+  </main>
+</body>
+</html>
