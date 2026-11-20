@@ -6,6 +6,16 @@ Run `npm ci` in `level-1-pilot` to install the browser client. From the Personal
 
 The Supabase project needs the quiz-progress migration and email sign-in enabled. The configured owner address can create its app account on the first sign-in, subject to the project's Auth settings. Enter the email code or copy the original Supabase verification link into the pilot. Sign in using the same account on each device. A quiz save checks its revision before writing, so an older browser cannot overwrite newer progress. Start without the settings file for local mode.
 
+## Hosted pilot
+
+Deploy the `coach-pilot` Edge Function from this folder with the Supabase CLI and a project-scoped deployment token. The function validates the Supabase session and verified owner email before serving lessons, scores, or read-aloud audio. The project injects its own Supabase URL and publishable key. Configure these server secrets in the Coach project:
+
+- `COACH_OWNER_EMAIL` is the email allowed to use the pilot.
+- `COACH_WEB_ORIGIN` is the HTTPS origin of the frontend, without a trailing slash.
+- `COACH_DEEPGRAM_API_KEY` enables optional read-aloud.
+
+From this folder, run `node --env-file=.env.local scripts/build-web.mjs` and publish the generated `web-dist` directory to the configured HTTPS host. The static build sends API requests to Supabase. It contains the sign-in interface and no course recordings, answer keys, or server secrets.
+
 ## Local mode
 
 From the PersonalCoach workspace, run `node level-1-pilot/server.mjs`. Open `http://127.0.0.1:4173` in Chrome on the same laptop. Node is the only server dependency. Leave that terminal running while you use the pilot and press Ctrl+C when finished.

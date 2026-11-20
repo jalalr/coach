@@ -1,4 +1,5 @@
 import { connectAccount } from './account.js';
+import { coachApiBase } from './host-config.js';
 
 const $ = id => document.getElementById(id);
 const storageKey = 'success-mastery:teachability:pilot-v1';
@@ -21,7 +22,7 @@ async function request(path, body) {
     options.headers['Content-Type'] = 'application/json';
     options.body = JSON.stringify(body);
   }
-  const response = await fetch(path, options);
+  const response = await fetch(coachApiBase + path, options);
   const data = await response.json();
   if (!response.ok) throw new Error(data.error || 'The request could not finish. Try again.');
   return data;
@@ -52,7 +53,7 @@ async function readAloud(id, control, status) {
   control.textContent = 'Cancel read-aloud';
   status.textContent = 'Preparing audio…';
   try {
-    const response = await fetch('/api/speech', {
+    const response = await fetch(coachApiBase + '/api/speech', {
       method: 'POST', headers: { ...authHeaders(), 'Content-Type': 'application/json' }, body: JSON.stringify({ id }),
       signal: current.controller.signal,
     });

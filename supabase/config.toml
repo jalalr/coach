@@ -1,0 +1,6 @@
+project_id = "coach-pilot"
+
+[functions.coach-pilot]
+# Only the sign-in request and public project config work before authentication.
+# The shared handler verifies the session and owner on every private request.
+verify_jwt = false
