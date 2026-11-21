@@ -18,6 +18,12 @@ From this folder, run `node --env-file=.env.local scripts/build-web.mjs` and pub
 
 In Azure Static Web Apps, deploy only `web-dist`. Set the Supabase Auth Site URL and allowed redirect URL to the Azure site address. The browser returns to the root page after an email link is verified. Request a fresh sign-in email after changing the address, since earlier links can still contain the earlier redirect.
 
+## Full Success Mastery course
+
+From this folder, run `node scripts/prepare-course.mjs` to prepare the private course package. Then run `node --env-file=.env.local scripts/import-course.mjs <project-ref>` with Database write access to import it into Coach. The import verifies all document counts before switching the active revision. Supabase holds the private assessment data and keys. GitHub and the Azure frontend receive only app source or static assets. Original recordings, PDFs, and full transcripts remain in the local course folder.
+
+The signed-in app includes the five-level library, lesson notes with recording timestamps, daily three-question drills, and assessment progress. The coach can find a recording note for the lesson you select and read it aloud on request. Keyed assessment responses are scored. Level 4 written and oral work and Level 5 Part A evidence are saved for review. Study and practice records leave mastery sign-off to the course review process.
+
 ## Local mode
 
 From the PersonalCoach workspace, run `node level-1-pilot/server.mjs`. Open `http://127.0.0.1:4173` in Chrome on the same laptop. Node is the only server dependency. Leave that terminal running while you use the pilot and press Ctrl+C when finished.

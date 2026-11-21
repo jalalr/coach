@@ -1,5 +1,6 @@
 import { connectAccount } from './account.js';
 import { coachApiBase } from './host-config.js';
+import { mountCourseLibrary } from './course-library.js';
 
 const $ = id => document.getElementById(id);
 const storageKey = 'success-mastery:teachability:pilot-v1';
@@ -10,6 +11,8 @@ let account;
 let authSession;
 let progressVersion = 0;
 let saving = false;
+let coachLesson;
+let replySpeech;
 
 function authHeaders() {
   return authSession ? { Authorization: `Bearer ${authSession.access_token}` } : {};
@@ -41,7 +44,7 @@ function stopPlayback() {
   current.status.textContent = '';
 }
 
-async function readAloud(id, control, status) {
+async function readAloud(id, control, status, courseRequest) {
   const wasPlaying = playback?.control === control;
   stopPlayback();
   status.textContent = '';
@@ -53,8 +56,8 @@ async function readAloud(id, control, status) {
   control.textContent = 'Cancel read-aloud';
   status.textContent = 'Preparing audio…';
   try {
-    const response = await fetch(coachApiBase + '/api/speech', {
-      method: 'POST', headers: { ...authHeaders(), 'Content-Type': 'application/json' }, body: JSON.stringify({ id }),
+    const response = await fetch(coachApiBase + (courseRequest ? '/api/course' : '/api/speech'), {
+      method: 'POST', headers: { ...authHeaders(), 'Content-Type': 'application/json' }, body: JSON.stringify(courseRequest ?? { id }),
       signal: current.controller.signal,
     });
     if (!response.ok) throw new Error((await response.json()).error);
@@ -84,13 +87,24 @@ async function ask() {
   submit.disabled = true;
   $('answer').hidden = false;
   $('read-reply').hidden = true;
+  $('reply-source').hidden = true;
   $('read-status').textContent = '';
   $('reply').textContent = 'Finding a lesson response…';
   try {
-    const { reply, speechId } = await request('/api/coach', { question });
+    const currentLesson = coachLesson;
+    const { reply, speechId, citation, section } = currentLesson
+      ? await request('/api/course', { view: 'ask', id: currentLesson.id, revision: currentLesson.revision, question })
+      : await request('/api/coach', { question });
+    if (currentLesson !== coachLesson) return;
     $('reply').textContent = reply;
-    $('read-reply').dataset.speechId = speechId;
-    $('read-reply').hidden = false;
+    replySpeech = Number.isInteger(section) && currentLesson ? { view: 'read', id: currentLesson.id, revision: currentLesson.revision, section } : null;
+    $('read-reply').dataset.speechId = speechId ?? '';
+    $('read-reply').hidden = !speechId && !replySpeech;
+    if (citation?.source) {
+      const time = seconds => Number.isFinite(seconds) ? `${Math.floor(seconds / 60)}:${String(Math.floor(seconds % 60)).padStart(2, '0')}` : '';
+      $('reply-source').textContent = `Recording notes · ${citation.source} · ${time(citation.start)}–${time(citation.end)}`;
+      $('reply-source').hidden = false;
+    }
   } catch (error) {
     $('reply').textContent = error.message;
   } finally {
@@ -101,8 +115,21 @@ async function ask() {
 $('ask-form').addEventListener('submit', event => { event.preventDefault(); ask(); });
 $('read-reply').addEventListener('click', () => {
   const control = $('read-reply');
-  readAloud(control.dataset.speechId, control, $('read-status'));
+  readAloud(control.dataset.speechId, control, $('read-status'), replySpeech);
 });
+
+function chooseCoachLesson(next) {
+  cancelVoice();
+  stopPlayback();
+  coachLesson = next;
+  $('coach-context').textContent = next ? `Ask about ${next.title}.` : 'Ask about teachability, get an example, or try a practice exercise.';
+  $('reset-coach-context').hidden = !next;
+  $('answer').hidden = true;
+  $('question').value = '';
+  $('question').focus();
+}
+
+$('reset-coach-context').addEventListener('click', () => chooseCoachLesson(null));
 
 function node(tag, text, className) {
   const element = document.createElement(tag);
@@ -437,6 +464,7 @@ async function loadCourse() {
   $('course-view').hidden = false;
   $('sign-in').hidden = true;
   configureVoice();
+  if (coachApiBase && $('course-library').hidden) mountCourseLibrary($('course-library'), request, chooseCoachLesson);
 }
 
 function showLoadError(error) {

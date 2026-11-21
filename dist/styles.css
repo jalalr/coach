@@ -58,6 +58,16 @@ legend{font-weight:740;line-height:1.4;margin-bottom:12px;padding:0}
 .feedback{margin:0 0 14px}
 .sign-in{max-width:34rem;margin:auto}
 .sign-in h1{font-size:3rem;margin-bottom:12px}
+.course-library{margin-bottom:24px}
+.course-library h2{font-size:1.65rem}
+.course-library h3{margin:1rem 0 .4rem}
+.course-library select,.course-library textarea{font:inherit;border:1px solid #abb2a2;border-radius:10px;padding:.55rem;background:#fff;color:var(--ink)}
+.course-library textarea{display:block;width:100%;min-height:100px;margin:.35rem 0 .85rem;resize:vertical}
+.course-toolbar,.course-actions{display:flex;flex-wrap:wrap;align-items:center;gap:.65rem;margin:.9rem 0}
+.course-module,.course-section{border-top:1px solid var(--edge);padding:.75rem 0}
+.course-list{padding-left:1.35rem;margin:.5rem 0}
+.course-list li{margin:.35rem 0}
+.course-citation{font-size:.89rem;color:var(--muted);margin:.35rem 0;overflow-wrap:anywhere}
 .result{font:500 2.65rem/1 Georgia,serif;margin-bottom:.7rem}
 .result-copy{margin-bottom:16px}
 @media(max-width:700px){.shell{width:calc(100% - 28px)}.grid{grid-template-columns:1fr}.hero-lines{opacity:.2;inset:-23% -68% -60% 40%}main{padding-top:20px}.source-row{align-items:flex-start}}

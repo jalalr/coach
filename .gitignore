@@ -2,6 +2,7 @@
 .env.*
 node_modules/
 web-dist/
+.course-import/
 supabase/.temp/
 *.mp3
 *.m4a

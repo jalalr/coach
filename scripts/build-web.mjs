@@ -7,7 +7,7 @@ if (!supabaseUrl || !/^https:\/\/[a-z0-9]+\.supabase\.co$/.test(supabaseUrl)) {
 
 const output = new URL('../web-dist/', import.meta.url);
 await mkdir(output, { recursive: true });
-for (const name of ['account.js', 'app.js', 'index.html', 'styles.css']) {
+for (const name of ['account.js', 'app.js', 'course-library.js', 'index.html', 'styles.css']) {
   await copyFile(new URL(`../dist/${name}`, import.meta.url), new URL(name, output));
 }
 await copyFile(new URL('../node_modules/@supabase/supabase-js/dist/umd/supabase.js', import.meta.url), new URL('supabase.js', output));

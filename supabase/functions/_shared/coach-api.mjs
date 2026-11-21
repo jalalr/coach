@@ -23,6 +23,19 @@ export function json(status, data) {
   return Response.json(data, { status, headers: { 'Cache-Control': 'no-store' } });
 }
 
+export async function synthesizeSpeech(apiKey, text) {
+  if (!apiKey) return null;
+  const upstream = await fetch('https://api.deepgram.com/v1/speak?model=aura-2-thalia-en&encoding=mp3&mip_opt_out=true', {
+    method: 'POST', headers: { Authorization: `Token ${apiKey}`, 'Content-Type': 'application/json' },
+    body: JSON.stringify({ text }), signal: AbortSignal.timeout(12000),
+  });
+  if (!upstream.ok || !upstream.headers.get('content-type')?.startsWith('audio/')) {
+    await upstream.body?.cancel();
+    throw new Error('Voice service did not return audio');
+  }
+  return upstream.arrayBuffer();
+}
+
 async function readBody(request) {
   if (!request.body) throw new Error('Missing body');
   const reader = request.body.getReader();
@@ -48,7 +61,7 @@ function coach(question) {
   return 'prompt';
 }
 
-export function createCoachApi({ account, ownerEmail, recordingAvailable = false, getVoiceKey, signInRedirect }) {
+export function createCoachApi({ account, ownerEmail, recordingAvailable = false, getVoiceKey, signInRedirect, course }) {
   const speechCache = new Map();
 
   async function authRequest(path, options) {
@@ -57,18 +70,18 @@ export function createCoachApi({ account, ownerEmail, recordingAvailable = false
     });
   }
 
-  async function authorize(authorization) {
-    if (!account) return null;
-    if (!authorization?.startsWith('Bearer ')) return json(401, { error: 'Sign in to use this pilot.' });
+  async function authenticate(authorization) {
+    if (!account) return {};
+    if (!authorization?.startsWith('Bearer ')) return { denied: json(401, { error: 'Sign in to use this pilot.' }) };
     try {
       const remote = await authRequest('user', { headers: { authorization } });
       if (remote.ok) {
         const user = await remote.json();
-        if (user.email_confirmed_at && user.email?.toLowerCase() === ownerEmail) return null;
+        if (user.email_confirmed_at && user.email?.toLowerCase() === ownerEmail && user.id) return { user };
       }
-      return json(403, { error: 'This account does not have access to the pilot.' });
+      return { denied: json(403, { error: 'This account does not have access to the pilot.' }) };
     } catch {
-      return json(502, { error: 'Sign-in could not be verified. Try again.' });
+      return { denied: json(502, { error: 'Sign-in could not be verified. Try again.' }) };
     }
   }
 
@@ -95,24 +108,9 @@ export function createCoachApi({ account, ownerEmail, recordingAvailable = false
     }
   }
 
-  async function synthesize(text) {
-    const apiKey = getVoiceKey();
-    if (!apiKey) return null;
-    const upstream = await fetch('https://api.deepgram.com/v1/speak?model=aura-2-thalia-en&encoding=mp3&mip_opt_out=true', {
-      method: 'POST',
-      headers: { Authorization: `Token ${apiKey}`, 'Content-Type': 'application/json' },
-      body: JSON.stringify({ text }), signal: AbortSignal.timeout(12000),
-    });
-    if (!upstream.ok || !upstream.headers.get('content-type')?.startsWith('audio/')) {
-      await upstream.body?.cancel();
-      throw new Error('Voice service did not return audio');
-    }
-    return upstream.arrayBuffer();
-  }
-
   async function playSpeech(id) {
     if (!speech.has(id)) return json(400, { error: 'Choose available text to read aloud.' });
-    if (!speechCache.has(id)) speechCache.set(id, synthesize(speech.get(id)));
+    if (!speechCache.has(id)) speechCache.set(id, synthesizeSpeech(getVoiceKey(), speech.get(id)));
     try {
       const audio = await speechCache.get(id);
       if (!audio) {
@@ -128,11 +126,21 @@ export function createCoachApi({ account, ownerEmail, recordingAvailable = false
 
   async function handle(request, path) {
     if (request.method === 'GET' && path === '/api/config') return json(200, { account });
+    if (path === '/api/course' && ['GET', 'POST'].includes(request.method)) {
+      const { user, denied } = await authenticate(request.headers.get('authorization'));
+      if (denied) return denied;
+      if (!course || !user) return json(404, { error: 'The full course requires the hosted app.' });
+      let body;
+      if (request.method === 'POST') {
+        try { body = await readBody(request); } catch { return json(400, { error: 'Invalid response.' }); }
+      }
+      return course(request.method, new URL(request.url), body, user.id);
+    }
     const isLesson = request.method === 'GET' && path === '/api/lesson';
     const isWrite = request.method === 'POST' && ['/api/sign-in-email', '/api/coach', '/api/grade', '/api/speech'].includes(path);
     if (!isLesson && !isWrite) return json(404, { error: 'Page unavailable.' });
     if (path !== '/api/sign-in-email') {
-      const denied = await authorize(request.headers.get('authorization'));
+      const { denied } = await authenticate(request.headers.get('authorization'));
       if (denied) return denied;
     }
     if (isLesson) return json(200, { summary, exercise, questions, citation, recordingAvailable });
@@ -154,5 +162,5 @@ export function createCoachApi({ account, ownerEmail, recordingAvailable = false
     return json(400, { error: 'Choose a valid answer or enter a question.' });
   }
 
-  return { authorize, handle };
+  return { authorize: async authorization => (await authenticate(authorization)).denied, handle };
 }

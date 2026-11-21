@@ -18,6 +18,7 @@
       <p id="account-status" class="status" role="status"></p>
     </section>
     <div id="course-view" hidden>
+    <section id="course-library" class="panel course-library" aria-labelledby="course-title" hidden></section>
     <section class="hero" aria-labelledby="lesson-title">
       <div class="hero-copy"><p class="eyebrow">Level 1 · Teachability</p><h1 id="lesson-title">Learn.<br>Then change.</h1><p id="summary">Loading lesson…</p></div>
       <div class="hero-lines" aria-hidden="true"><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i></div>
@@ -26,12 +27,13 @@
     <div class="grid" id="workspace" hidden>
       <section class="panel coach" aria-labelledby="coach-title">
         <div class="section-head"><h2 id="coach-title">Talk to your coach</h2><span class="mode">On-device voice</span></div>
-        <p class="muted">Ask about teachability, get an example, or try a practice exercise.</p>
+        <p id="coach-context" class="muted">Ask about teachability, get an example, or try a practice exercise.</p>
+        <button id="reset-coach-context" class="link" type="button" hidden>Return to Teachability</button>
         <button id="hold" class="hold" type="button" aria-describedby="voice-status" disabled><span class="wave" aria-hidden="true">▂▅▇▅▂</span> <span id="hold-label">Hold to talk</span></button>
         <div class="voice-controls"><button id="setup" class="link" type="button" hidden>Enable voice</button><button id="toggle-record" class="link" type="button" hidden>Start recording</button></div>
         <p id="voice-status" class="status" role="status"></p>
         <form id="ask-form"><label for="question">Your question</label><div class="form-row"><input id="question" placeholder="How can I practise this?" maxlength="350" required><button class="primary" type="submit">Ask</button></div></form>
-        <div id="answer" class="response" hidden><p id="reply" role="status"></p><button id="read-reply" class="link" type="button">Read reply aloud</button><p id="read-status" class="status" role="status"></p></div>
+        <div id="answer" class="response" hidden><p id="reply" role="status"></p><p id="reply-source" class="course-citation" hidden></p><button id="read-reply" class="link" type="button">Read reply aloud</button><p id="read-status" class="status" role="status"></p></div>
         <details class="exercise"><summary>Practice exercise</summary><p id="exercise"></p></details>
       </section>
       <section class="panel quiz" aria-labelledby="quiz-title">

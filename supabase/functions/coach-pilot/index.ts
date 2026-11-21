@@ -1,16 +1,21 @@
 import { createCoachApi, json } from '../_shared/coach-api.mjs';
+import { createCourseApi } from '../_shared/course-api.mjs';
 
 const supabaseUrl = Deno.env.get('SUPABASE_URL')?.replace(/\/$/, '');
 const keys = JSON.parse(Deno.env.get('SUPABASE_PUBLISHABLE_KEYS') || '{}');
 const publishableKey = Deno.env.get('COACH_PUBLISHABLE_KEY') || keys.default || Object.values(keys)[0];
 const ownerEmail = Deno.env.get('COACH_OWNER_EMAIL')?.trim().toLowerCase();
 const webOrigin = Deno.env.get('COACH_WEB_ORIGIN')?.trim();
+const serverKeys = JSON.parse(Deno.env.get('SUPABASE_SECRET_KEYS') || '{}');
+const serviceKey = serverKeys.default || Object.values(serverKeys)[0] || Deno.env.get('SUPABASE_SERVICE_ROLE_KEY');
+const getVoiceKey = () => Deno.env.get('COACH_DEEPGRAM_API_KEY');
 const api = supabaseUrl && typeof publishableKey === 'string' && ownerEmail
   ? createCoachApi({
     account: { supabaseUrl, publishableKey },
     ownerEmail,
-    getVoiceKey: () => Deno.env.get('COACH_DEEPGRAM_API_KEY'),
+    getVoiceKey,
     signInRedirect: webOrigin ? new URL('/', webOrigin).href : undefined,
+    course: createCourseApi({ supabaseUrl, serviceKey, getVoiceKey }),
   })
   : null;
 
