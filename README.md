@@ -20,11 +20,11 @@ In Azure Static Web Apps, deploy only `web-dist`. Set the Supabase Auth Site URL
 
 ## Install on a phone
 
-Open the Azure site in Chrome on Android and use **Install app** in Coach or the browser menu. On iPhone, open the site in Safari and use **Share → Add to Home Screen → Open as Web App**. The installed app opens to the same account and course. Sign-in, lessons, and quiz sync use an internet connection. The service worker displays a reconnect screen when the app opens offline.
+Open the Azure site in Chrome on Android and choose **Install app**, or **⋮ → Install and create shortcut → Install**. Check Android **Settings → Apps → See all apps** for Coach. A shortcut created instead appears on the home screen and may carry the browser badge. On iPhone, open the site in Safari and use **Share → Add to Home Screen → Open as Web App**. Sign-in, lessons, and quiz sync use an internet connection.
 
 ## Daily study reminders
 
-Open the installed app, sign in, and expand **Daily learning reminder**. Set a local time and select **Enable reminders**, then allow notifications. Use **Send test** to check this device or **Turn off** to stop. A notification opens daily practice for the last course level selected on that device. iPhone web push requires the Home Screen app on iOS 16.4 or later.
+Open the installed app, sign in, and expand **Daily learning reminder**. Set a local time and select **Enable reminders**, then allow notifications. Use **Send test** to check this device or **Turn off** to stop. A notification opens a random unstudied lesson from the last level selected on that device. If you have studied every lesson in that level, it opens the level overview. iPhone web push requires the Home Screen app on iOS 16.4 or later.
 
 For a new backend, run `node --env-file=.env.local scripts/provision-reminders.mjs <project-ref> prepare`, deploy the Coach Edge Function, then run the same script with `schedule`. The scheduler checks every five minutes and sends only to registrations the owner has enabled. Keep the existing signing keys when redeploying so device registrations remain valid.
 

@@ -1,32 +1,37 @@
-const pendingDaily = 'coach:open-daily-practice';
-let dailyRequested = false;
+const pendingLesson = 'coach:open-reminder-lesson';
+const legacyPending = 'coach:open-daily-practice';
+let lessonRequested = false;
 
-function requestDaily() {
-  dailyRequested = true;
-  try { sessionStorage.setItem(pendingDaily, '1'); } catch { /* The current tab can still open practice. */ }
+function requestLesson() {
+  lessonRequested = true;
+  try { sessionStorage.setItem(pendingLesson, '1'); } catch { /* The current tab can still open the lesson. */ }
 }
 
-export function watchDailyLinks() {
+export function watchReminderLinks() {
   const url = new URL(location.href);
-  if (url.searchParams.get('practice') === 'daily') {
-    requestDaily();
-    url.searchParams.delete('practice');
+  const directLesson = url.searchParams.get('lesson') === 'unstudied';
+  const olderReminder = url.searchParams.get('practice') === 'daily';
+  if (directLesson || olderReminder) {
+    requestLesson();
+    if (directLesson) url.searchParams.delete('lesson');
+    if (olderReminder) url.searchParams.delete('practice');
     history.replaceState(history.state, '', url.href);
   }
   navigator.serviceWorker?.addEventListener('message', event => {
-    if (event.data?.type !== 'open-daily') return;
-    requestDaily();
-    window.dispatchEvent(new Event('coach-open-daily'));
+    if (!['open-reminder-lesson', 'open-daily'].includes(event.data?.type)) return;
+    requestLesson();
+    window.dispatchEvent(new Event('coach-open-reminder'));
   });
 }
 
-export function takeDailyLink() {
-  let requested = dailyRequested;
+export function takeLessonReminder() {
+  let requested = lessonRequested;
   try {
-    requested = requested || sessionStorage.getItem(pendingDaily) === '1';
-    sessionStorage.removeItem(pendingDaily);
+    requested = requested || sessionStorage.getItem(pendingLesson) === '1' || sessionStorage.getItem(legacyPending) === '1';
+    sessionStorage.removeItem(pendingLesson);
+    sessionStorage.removeItem(legacyPending);
   } catch { /* Use the in-memory value when storage is unavailable. */ }
-  dailyRequested = false;
+  lessonRequested = false;
   return requested;
 }
 

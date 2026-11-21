@@ -1,4 +1,4 @@
-import { takeDailyLink } from './reminders.js';
+import { takeLessonReminder } from './reminders.js';
 
 function element(tag, text, className) {
   const node = document.createElement(tag);
@@ -60,7 +60,7 @@ export async function mountCourseLibrary(root, request, chooseCoachLesson) {
       const view = await fetchView();
       if (sequence !== navigation) return;
       status.textContent = '';
-      show(view);
+      return await show(view);
     } catch (error) {
       if (sequence === navigation) status.textContent = error.message;
     }
@@ -78,6 +78,7 @@ export async function mountCourseLibrary(root, request, chooseCoachLesson) {
     } finally {
       writing = false;
       control.disabled = false;
+      openFromReminder();
     }
   }
 
@@ -123,18 +124,30 @@ export async function mountCourseLibrary(root, request, chooseCoachLesson) {
     panel.append(progression);
   }
 
-  function openRandomLesson() {
+  function openRandomLesson(unstudiedOnly = false) {
     if (writing) return;
     const lessons = currentLevel().modules.flatMap(module => module.lessons);
-    if (!lessons.length) {
-      status.textContent = 'No lessons are available in this level.';
+    const candidates = unstudiedOnly ? lessons.filter(lesson => !studied.has(lesson.id)) : lessons;
+    if (!candidates.length) {
+      if (unstudiedOnly) openLevel();
+      status.textContent = lessons.length ? `All lessons in Level ${selected} are marked studied.` : 'No lessons are available in this level.';
       return;
     }
-    const different = lessons.filter(lesson => lesson.id !== lastLessonId);
-    const available = different.length ? different : lessons;
+    const different = candidates.filter(lesson => lesson.id !== lastLessonId);
+    const available = different.length ? different : candidates;
     const unstudied = available.filter(lesson => !studied.has(lesson.id));
     const choices = unstudied.length ? unstudied : available;
     return openLesson(choices[Math.floor(Math.random() * choices.length)].id, true);
+  }
+
+  function openFromReminder(refresh = true) {
+    if (writing || !takeLessonReminder()) return;
+    if (!refresh) return openRandomLesson(true);
+    return navigate(() => get({ view: 'index' }), data => {
+      revision = data.revision;
+      studied = new Set(data.studied);
+      return openRandomLesson(true);
+    });
   }
 
   function openLesson(id, focusTitle = false) {
@@ -284,11 +297,10 @@ export async function mountCourseLibrary(root, request, chooseCoachLesson) {
     const coach = element('a', 'Voice practice', 'link');
     coach.href = '#coach-title';
     const daily = () => openAssessment({ view: 'daily', level: selected, day: localDay() });
-    const openFromReminder = () => { if (!writing && takeDailyLink()) daily(); };
-    toolbar.append(label, levels, button('Daily practice', daily, 'primary'), button('Random lesson', openRandomLesson), coach);
+    toolbar.append(label, levels, button('Daily practice', daily, 'primary'), button('Random lesson', () => openRandomLesson()), coach);
     openLevel();
-    window.addEventListener('coach-open-daily', openFromReminder);
-    openFromReminder();
+    window.addEventListener('coach-open-reminder', () => openFromReminder());
+    await openFromReminder(false);
   } catch (error) {
     status.textContent = error.message;
   }

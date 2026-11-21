@@ -1,9 +1,9 @@
 import { connectAccount } from './account.js';
 import { coachApiBase } from './host-config.js';
 import { mountCourseLibrary } from './course-library.js';
-import { mountReminders, watchDailyLinks } from './reminders.js';
+import { mountReminders, watchReminderLinks } from './reminders.js';
 
-watchDailyLinks();
+watchReminderLinks();
 
 const $ = id => document.getElementById(id);
 const storageKey = 'success-mastery:teachability:pilot-v1';
