@@ -9,7 +9,7 @@ const output = new URL('../web-dist/', import.meta.url);
 await mkdir(output, { recursive: true });
 for (const name of [
   'account.js', 'app.js', 'course-library.js', 'index.html', 'styles.css', 'install.js', 'service-worker.js',
-  'manifest.webmanifest', 'coach-180.png', 'coach-192.png', 'coach-512.png',
+  'manifest.webmanifest', 'coach-180.png', 'coach-192.png', 'coach-512.png', 'reminders.js',
 ]) {
   await copyFile(new URL(`../dist/${name}`, import.meta.url), new URL(name, output));
 }

@@ -61,7 +61,7 @@ function coach(question) {
   return 'prompt';
 }
 
-export function createCoachApi({ account, ownerEmail, recordingAvailable = false, getVoiceKey, signInRedirect, course }) {
+export function createCoachApi({ account, ownerEmail, recordingAvailable = false, getVoiceKey, signInRedirect, course, reminders }) {
   const speechCache = new Map();
 
   async function authRequest(path, options) {
@@ -126,6 +126,17 @@ export function createCoachApi({ account, ownerEmail, recordingAvailable = false
 
   async function handle(request, path) {
     if (request.method === 'GET' && path === '/api/config') return json(200, { account });
+    if (request.method === 'POST' && path === '/api/jobs/daily-reminders') {
+      return reminders ? reminders.run(request.headers.get('authorization')) : json(503, { error: 'Reminders are unavailable.' });
+    }
+    if (request.method === 'POST' && path === '/api/reminders') {
+      const { user, denied } = await authenticate(request.headers.get('authorization'));
+      if (denied) return denied;
+      if (!reminders || !user) return json(503, { error: 'Reminders are unavailable.' });
+      let body;
+      try { body = await readBody(request); } catch { return json(400, { error: 'Invalid reminder settings.' }); }
+      return reminders.manage(body, user.id);
+    }
     if (path === '/api/course' && ['GET', 'POST'].includes(request.method)) {
       const { user, denied } = await authenticate(request.headers.get('authorization'));
       if (denied) return denied;

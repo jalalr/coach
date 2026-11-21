@@ -19,6 +19,7 @@ const files = {
   '/host-config.js': ['host-config.js', 'text/javascript'],
   '/course-library.js': ['course-library.js', 'text/javascript'],
   '/install.js': ['install.js', 'text/javascript'],
+  '/reminders.js': ['reminders.js', 'text/javascript'],
   '/service-worker.js': ['service-worker.js', 'text/javascript'],
   '/manifest.webmanifest': ['manifest.webmanifest', 'application/manifest+json'],
   '/coach-180.png': ['coach-180.png', 'image/png'],

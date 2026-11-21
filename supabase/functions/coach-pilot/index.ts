@@ -1,5 +1,7 @@
 import { createCoachApi, json } from '../_shared/coach-api.mjs';
 import { createCourseApi } from '../_shared/course-api.mjs';
+import { createReminders } from '../_shared/reminders.mjs';
+import { buildPushPayload } from 'npm:@block65/webcrypto-web-push@2.0.0';
 
 const supabaseUrl = Deno.env.get('SUPABASE_URL')?.replace(/\/$/, '');
 const keys = JSON.parse(Deno.env.get('SUPABASE_PUBLISHABLE_KEYS') || '{}');
@@ -16,6 +18,14 @@ const api = supabaseUrl && typeof publishableKey === 'string' && ownerEmail
     getVoiceKey,
     signInRedirect: webOrigin ? new URL('/', webOrigin).href : undefined,
     course: createCourseApi({ supabaseUrl, serviceKey, getVoiceKey }),
+    reminders: createReminders({ supabaseUrl, serviceKey, buildPushPayload,
+      jobKey: Deno.env.get('COACH_REMINDER_JOB_KEY'),
+      vapid: {
+        subject: webOrigin,
+        publicKey: Deno.env.get('COACH_PUSH_PUBLIC_KEY'),
+        privateKey: Deno.env.get('COACH_PUSH_PRIVATE_KEY'),
+      },
+    }),
   })
   : null;
 

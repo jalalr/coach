@@ -61,6 +61,8 @@ legend{font-weight:740;line-height:1.4;margin-bottom:12px;padding:0}
 .sign-in{max-width:34rem;margin:auto}
 .sign-in h1{font-size:3rem;margin-bottom:12px}
 .course-library{margin-bottom:24px}
+.reminder-panel{margin-bottom:14px}
+.reminder-panel input{width:auto}
 .course-library h2{font-size:1.65rem}
 .course-library h3{margin:1rem 0 .4rem}
 .course-library select,.course-library textarea{font:inherit;border:1px solid #abb2a2;border-radius:10px;padding:.55rem;background:#fff;color:var(--ink)}

@@ -17,6 +17,28 @@ const offlinePage = `<!doctype html>
 self.addEventListener('install', event => event.waitUntil(self.skipWaiting()));
 self.addEventListener('activate', event => event.waitUntil(self.clients.claim()));
 
+self.addEventListener('push', event => {
+  let test = false;
+  try { test = event.data?.json().test === true; } catch { /* Show the standard reminder. */ }
+  event.waitUntil(self.registration.showNotification(test ? 'Coach test reminder' : 'Time for mastery practice', {
+    body: test ? 'Notifications are working on this device.' : 'Open Coach for today’s three-question practice.',
+    icon: '/coach-192.png', tag: test ? 'coach-test' : 'coach-daily',
+  }));
+});
+
+self.addEventListener('notificationclick', event => {
+  event.notification.close();
+  event.waitUntil((async () => {
+    const windows = await self.clients.matchAll({ type: 'window', includeUncontrolled: true });
+    const coach = windows.find(client => new URL(client.url).origin === self.location.origin);
+    if (coach) {
+      coach.postMessage({ type: 'open-daily' });
+      return coach.focus();
+    }
+    return self.clients.openWindow('/?practice=daily');
+  })());
+});
+
 self.addEventListener('fetch', event => {
   const { request } = event;
   if (request.method !== 'GET' || request.mode !== 'navigate') return;

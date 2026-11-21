@@ -22,6 +22,19 @@
       <p id="account-status" class="status" role="status"></p>
     </section>
     <div id="course-view" hidden>
+    <details id="daily-reminder" class="panel reminder-panel" hidden>
+      <summary>Daily learning reminder</summary>
+      <form id="reminder-form">
+        <label for="reminder-time">Time on this device</label>
+        <div class="course-actions">
+          <input id="reminder-time" type="time" value="08:00" required>
+          <button id="reminder-enable" class="primary" disabled>Enable reminders</button>
+          <button id="reminder-test" class="secondary" type="button" hidden>Send test</button>
+          <button id="reminder-disable" class="link" type="button" hidden>Turn off</button>
+        </div>
+        <p id="reminder-status" class="status" role="status"></p>
+      </form>
+    </details>
     <section id="course-library" class="panel course-library" aria-labelledby="course-title" hidden></section>
     <section class="hero" aria-labelledby="lesson-title">
       <div class="hero-copy"><p class="eyebrow">Level 1 · Teachability</p><h1 id="lesson-title">Learn.<br>Then change.</h1><p id="summary">Loading lesson…</p></div>

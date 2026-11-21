@@ -1,3 +1,5 @@
+import { takeDailyLink } from './reminders.js';
+
 function element(tag, text, className) {
   const node = document.createElement(tag);
   if (text) node.textContent = text;
@@ -45,6 +47,7 @@ export async function mountCourseLibrary(root, request, chooseCoachLesson) {
   let index;
   let studied;
   let selected = 1;
+  try { selected = Number(localStorage.getItem('coach:course-level')) || 1; } catch { /* Use Level 1 when storage is unavailable. */ }
   let navigation = 0;
   let writing = false;
 
@@ -240,20 +243,27 @@ export async function mountCourseLibrary(root, request, chooseCoachLesson) {
   try {
     ({ revision, index, studied } = await get({ view: 'index' }));
     studied = new Set(studied);
+    if (!index.levelIndex.some(level => level.level === selected)) selected = 1;
     const label = element('label', 'Course level');
     label.htmlFor = 'course-level';
     const levels = element('select');
     levels.id = 'course-level';
     for (const { level } of index.levelIndex) levels.append(new Option(`Level ${level}`, String(level)));
+    levels.value = String(selected);
     levels.addEventListener('change', () => {
       if (writing) { levels.value = String(selected); return; }
       selected = Number(levels.value);
+      try { localStorage.setItem('coach:course-level', String(selected)); } catch { /* Continue at the selected level in this tab. */ }
       openLevel();
     });
     const coach = element('a', 'Voice practice', 'link');
     coach.href = '#coach-title';
-    toolbar.append(label, levels, button('Daily practice', () => openAssessment({ view: 'daily', level: selected, day: localDay() }), 'primary'), coach);
+    const daily = () => openAssessment({ view: 'daily', level: selected, day: localDay() });
+    const openFromReminder = () => { if (!writing && takeDailyLink()) daily(); };
+    toolbar.append(label, levels, button('Daily practice', daily, 'primary'), coach);
     openLevel();
+    window.addEventListener('coach-open-daily', openFromReminder);
+    openFromReminder();
   } catch (error) {
     status.textContent = error.message;
   }

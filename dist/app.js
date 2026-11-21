@@ -1,6 +1,9 @@
 import { connectAccount } from './account.js';
 import { coachApiBase } from './host-config.js';
 import { mountCourseLibrary } from './course-library.js';
+import { mountReminders, watchDailyLinks } from './reminders.js';
+
+watchDailyLinks();
 
 const $ = id => document.getElementById(id);
 const storageKey = 'success-mastery:teachability:pilot-v1';
@@ -464,7 +467,10 @@ async function loadCourse() {
   $('course-view').hidden = false;
   $('sign-in').hidden = true;
   configureVoice();
-  if (coachApiBase && $('course-library').hidden) mountCourseLibrary($('course-library'), request, chooseCoachLesson);
+  if (coachApiBase && $('course-library').hidden) {
+    mountCourseLibrary($('course-library'), request, chooseCoachLesson);
+    mountReminders(request);
+  }
 }
 
 function showLoadError(error) {
