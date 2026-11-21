@@ -10,6 +10,8 @@ p,h1,h2{margin:0}
 .shell{width:min(1080px,calc(100% - 48px));margin:auto}
 .site-header{border-bottom:1px solid var(--edge)}
 .topbar{display:flex;min-height:68px;align-items:center;justify-content:space-between;gap:1rem}
+.header-actions{display:flex;align-items:center;justify-content:flex-end;gap:.75rem}
+@media(max-width:480px){.topbar:has(.header-actions > :not([hidden])) .local-label{display:none}.topbar{gap:.65rem}.header-actions{gap:.55rem}}
 .brand{display:flex;align-items:center;gap:.65rem;font-weight:750}
 .brand-mark{display:grid;place-items:center;width:30px;height:30px;border-radius:50%;background:var(--olive);color:var(--lime)}
 .local-label,.mode,.eyebrow,.source-label{font-size:.875rem;font-weight:700}

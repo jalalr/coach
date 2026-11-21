@@ -18,6 +18,12 @@ const files = {
   '/account.js': ['account.js', 'text/javascript'],
   '/host-config.js': ['host-config.js', 'text/javascript'],
   '/course-library.js': ['course-library.js', 'text/javascript'],
+  '/install.js': ['install.js', 'text/javascript'],
+  '/service-worker.js': ['service-worker.js', 'text/javascript'],
+  '/manifest.webmanifest': ['manifest.webmanifest', 'application/manifest+json'],
+  '/coach-180.png': ['coach-180.png', 'image/png'],
+  '/coach-192.png': ['coach-192.png', 'image/png'],
+  '/coach-512.png': ['coach-512.png', 'image/png'],
 };
 const supabaseUrl = (process.env.SUPABASE_URL || process.env.NEXT_PUBLIC_SUPABASE_URL)?.trim().replace(/\/$/, '');
 const publishableKey = (process.env.SUPABASE_PUBLISHABLE_KEY || process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY)?.trim();
@@ -94,7 +100,8 @@ createServer(async (request, response) => {
     }
     if (Object.hasOwn(files, request.url)) {
       const [name, type] = files[request.url];
-      response.writeHead(200, { 'Content-Type': type + '; charset=utf-8', 'Cache-Control': 'no-store' });
+      const contentType = type.startsWith('image/') ? type : type + '; charset=utf-8';
+      response.writeHead(200, { 'Content-Type': contentType, 'Cache-Control': 'no-store' });
       createReadStream(new URL('./dist/' + name, import.meta.url)).pipe(response);
       return;
     }

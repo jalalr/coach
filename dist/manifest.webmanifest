@@ -1,0 +1,14 @@
+{
+  "id": "/",
+  "name": "Success Mastery Coach",
+  "short_name": "Coach",
+  "start_url": "/",
+  "scope": "/",
+  "display": "standalone",
+  "background_color": "#f6f6ef",
+  "theme_color": "#f6f6ef",
+  "icons": [
+    { "src": "/coach-192.png", "sizes": "192x192", "type": "image/png", "purpose": "any" },
+    { "src": "/coach-512.png", "sizes": "512x512", "type": "image/png", "purpose": "any maskable" }
+  ]
+}

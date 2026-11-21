@@ -7,7 +7,10 @@ if (!supabaseUrl || !/^https:\/\/[a-z0-9]+\.supabase\.co$/.test(supabaseUrl)) {
 
 const output = new URL('../web-dist/', import.meta.url);
 await mkdir(output, { recursive: true });
-for (const name of ['account.js', 'app.js', 'course-library.js', 'index.html', 'styles.css']) {
+for (const name of [
+  'account.js', 'app.js', 'course-library.js', 'index.html', 'styles.css', 'install.js', 'service-worker.js',
+  'manifest.webmanifest', 'coach-180.png', 'coach-192.png', 'coach-512.png',
+]) {
   await copyFile(new URL(`../dist/${name}`, import.meta.url), new URL(name, output));
 }
 await copyFile(new URL('../node_modules/@supabase/supabase-js/dist/umd/supabase.js', import.meta.url), new URL('supabase.js', output));
@@ -15,5 +18,7 @@ const apiBase = `${supabaseUrl}/functions/v1/coach-pilot`;
 await writeFile(new URL('host-config.js', output), `export const coachApiBase = ${JSON.stringify(apiBase)};\n`);
 await writeFile(new URL('staticwebapp.config.json', output), JSON.stringify({
   globalHeaders: { 'Referrer-Policy': 'no-referrer', 'X-Content-Type-Options': 'nosniff' },
+  mimeTypes: { '.webmanifest': 'application/manifest+json' },
+  routes: [{ route: '/service-worker.js', headers: { 'Cache-Control': 'no-cache' } }],
 }, null, 2) + '\n');
 console.log('Built the public interface in web-dist. Course content and provider keys are on the backend.');

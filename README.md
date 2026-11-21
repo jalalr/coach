@@ -18,6 +18,10 @@ From this folder, run `node --env-file=.env.local scripts/build-web.mjs` and pub
 
 In Azure Static Web Apps, deploy only `web-dist`. Set the Supabase Auth Site URL and allowed redirect URL to the Azure site address. The browser returns to the root page after an email link is verified. Request a fresh sign-in email after changing the address, since earlier links can still contain the earlier redirect.
 
+## Install on a phone
+
+Open the Azure site in Chrome on Android and use **Install app** in Coach or the browser menu. On iPhone, open the site in Safari and use **Share → Add to Home Screen → Open as Web App**. The installed app opens to the same account and course. Sign-in, lessons, and quiz sync use an internet connection. The service worker displays a reconnect screen when the app opens offline.
+
 ## Full Success Mastery course
 
 From this folder, run `node scripts/prepare-course.mjs` to prepare the private course package. Then run `node --env-file=.env.local scripts/import-course.mjs <project-ref>` with Database write access to import it into Coach. The import verifies all document counts before switching the active revision. Supabase holds the private assessment data and keys. GitHub and the Azure frontend receive only app source or static assets. Original recordings, PDFs, and full transcripts remain in the local course folder.
