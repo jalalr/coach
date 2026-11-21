@@ -16,6 +16,8 @@ Deploy the `coach-pilot` Edge Function from this folder with the Supabase CLI an
 
 From this folder, run `node --env-file=.env.local scripts/build-web.mjs` and publish the generated `web-dist` directory to the configured HTTPS host. The static build sends API requests to Supabase. It contains the sign-in interface and no course recordings, answer keys, or server secrets.
 
+In Azure Static Web Apps, deploy only `web-dist`. Set the Supabase Auth Site URL and allowed redirect URL to the Azure site address. The browser returns to the root page after an email link is verified. Request a fresh sign-in email after changing the address, since earlier links can still contain the earlier redirect.
+
 ## Local mode
 
 From the PersonalCoach workspace, run `node level-1-pilot/server.mjs`. Open `http://127.0.0.1:4173` in Chrome on the same laptop. Node is the only server dependency. Leave that terminal running while you use the pilot and press Ctrl+C when finished.

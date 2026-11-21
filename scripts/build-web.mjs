@@ -13,4 +13,7 @@ for (const name of ['account.js', 'app.js', 'index.html', 'styles.css']) {
 await copyFile(new URL('../node_modules/@supabase/supabase-js/dist/umd/supabase.js', import.meta.url), new URL('supabase.js', output));
 const apiBase = `${supabaseUrl}/functions/v1/coach-pilot`;
 await writeFile(new URL('host-config.js', output), `export const coachApiBase = ${JSON.stringify(apiBase)};\n`);
+await writeFile(new URL('staticwebapp.config.json', output), JSON.stringify({
+  globalHeaders: { 'Referrer-Policy': 'no-referrer', 'X-Content-Type-Options': 'nosniff' },
+}, null, 2) + '\n');
 console.log('Built the public interface in web-dist. Course content and provider keys are on the backend.');

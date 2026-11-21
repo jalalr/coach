@@ -48,7 +48,7 @@ function coach(question) {
   return 'prompt';
 }
 
-export function createCoachApi({ account, ownerEmail, recordingAvailable = false, getVoiceKey }) {
+export function createCoachApi({ account, ownerEmail, recordingAvailable = false, getVoiceKey, signInRedirect }) {
   const speechCache = new Map();
 
   async function authRequest(path, options) {
@@ -78,7 +78,8 @@ export function createCoachApi({ account, ownerEmail, recordingAvailable = false
       return json(403, { error: 'Use the email configured for this private pilot.' });
     }
     try {
-      const upstream = await authRequest('otp', {
+      const endpoint = signInRedirect ? 'otp?' + new URLSearchParams({ redirect_to: signInRedirect }) : 'otp';
+      const upstream = await authRequest(endpoint, {
         method: 'POST', headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ email: ownerEmail, create_user: true }),
       });

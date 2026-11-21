@@ -465,7 +465,7 @@ $('send-code').addEventListener('submit', event => accountAction(event, async ()
   await request('/api/sign-in-email', { email });
   pendingEmail = email;
   $('verify-code').hidden = false;
-  $('account-status').textContent = 'Enter the code from your email. If you received a link instead, copy it from the email and paste it here.';
+  $('account-status').textContent = 'Open the sign-in link on this device, or enter the code from your email. You can also paste the original verification link here.';
   $('code').focus();
 }));
 $('verify-code').addEventListener('submit', event => accountAction(event, async () => {

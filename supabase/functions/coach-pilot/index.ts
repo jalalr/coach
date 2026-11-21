@@ -6,7 +6,12 @@ const publishableKey = Deno.env.get('COACH_PUBLISHABLE_KEY') || keys.default || 
 const ownerEmail = Deno.env.get('COACH_OWNER_EMAIL')?.trim().toLowerCase();
 const webOrigin = Deno.env.get('COACH_WEB_ORIGIN')?.trim();
 const api = supabaseUrl && typeof publishableKey === 'string' && ownerEmail
-  ? createCoachApi({ account: { supabaseUrl, publishableKey }, ownerEmail, getVoiceKey: () => Deno.env.get('COACH_DEEPGRAM_API_KEY') })
+  ? createCoachApi({
+    account: { supabaseUrl, publishableKey },
+    ownerEmail,
+    getVoiceKey: () => Deno.env.get('COACH_DEEPGRAM_API_KEY'),
+    signInRedirect: webOrigin ? new URL('/', webOrigin).href : undefined,
+  })
   : null;
 
 Deno.serve(async request => {

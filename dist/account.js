@@ -9,7 +9,7 @@ export async function connectAccount(config) {
     document.head.append(sdk);
   });
   const client = window.supabase.createClient(config.supabaseUrl, config.publishableKey, {
-    auth: { detectSessionInUrl: false, flowType: 'pkce' },
+    auth: { detectSessionInUrl: true, flowType: 'implicit' },
   });
 
   function value(result) {
