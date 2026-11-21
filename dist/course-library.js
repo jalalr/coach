@@ -47,6 +47,7 @@ export async function mountCourseLibrary(root, request, chooseCoachLesson) {
   let index;
   let studied;
   let selected = 1;
+  let lastLessonId;
   try { selected = Number(localStorage.getItem('coach:course-level')) || 1; } catch { /* Use Level 1 when storage is unavailable. */ }
   let navigation = 0;
   let writing = false;
@@ -80,11 +81,15 @@ export async function mountCourseLibrary(root, request, chooseCoachLesson) {
     }
   }
 
+  function currentLevel() {
+    return index.levelIndex.find(level => level.level === selected);
+  }
+
   function openLevel() {
     if (writing) return;
     ++navigation;
     status.textContent = '';
-    const level = index.levelIndex.find(level => level.level === selected);
+    const level = currentLevel();
     const lessons = level.modules.flatMap(module => module.lessons);
     const label = element('h3', `Level ${selected}`);
     const progress = element('p', `${lessons.filter(item => studied.has(item.id)).length} of ${lessons.length} lessons studied`, 'muted');
@@ -118,9 +123,25 @@ export async function mountCourseLibrary(root, request, chooseCoachLesson) {
     panel.append(progression);
   }
 
-  function openLesson(id) {
+  function openRandomLesson() {
+    if (writing) return;
+    const lessons = currentLevel().modules.flatMap(module => module.lessons);
+    if (!lessons.length) {
+      status.textContent = 'No lessons are available in this level.';
+      return;
+    }
+    const different = lessons.filter(lesson => lesson.id !== lastLessonId);
+    const available = different.length ? different : lessons;
+    const unstudied = available.filter(lesson => !studied.has(lesson.id));
+    const choices = unstudied.length ? unstudied : available;
+    return openLesson(choices[Math.floor(Math.random() * choices.length)].id, true);
+  }
+
+  function openLesson(id, focusTitle = false) {
     return navigate(() => get({ view: 'lesson', id }), ({ lesson }) => {
-      panel.replaceChildren(button('Level overview', openLevel), element('h3', lesson.title));
+      lastLessonId = id;
+      const title = element('h3', lesson.title);
+      panel.replaceChildren(button('Level overview', openLevel), title);
       panel.append(button('Ask the coach about this lesson', () => chooseCoachLesson({ id, title: lesson.title, revision }), 'primary'));
       panel.append(element('p', 'Recording notes for review', 'muted'));
       if (!lesson.sections.length) panel.append(element('p', 'This recording’s summary needs review.'));
@@ -148,6 +169,10 @@ export async function mountCourseLibrary(root, request, chooseCoachLesson) {
         status.textContent = 'Lesson progress saved.';
       }), 'primary');
       panel.append(mark);
+      if (focusTitle) {
+        title.tabIndex = -1;
+        title.focus();
+      }
     });
   }
 
@@ -260,7 +285,7 @@ export async function mountCourseLibrary(root, request, chooseCoachLesson) {
     coach.href = '#coach-title';
     const daily = () => openAssessment({ view: 'daily', level: selected, day: localDay() });
     const openFromReminder = () => { if (!writing && takeDailyLink()) daily(); };
-    toolbar.append(label, levels, button('Daily practice', daily, 'primary'), coach);
+    toolbar.append(label, levels, button('Daily practice', daily, 'primary'), button('Random lesson', openRandomLesson), coach);
     openLevel();
     window.addEventListener('coach-open-daily', openFromReminder);
     openFromReminder();

@@ -32,7 +32,7 @@ For a new backend, run `node --env-file=.env.local scripts/provision-reminders.m
 
 From this folder, run `node scripts/prepare-course.mjs` to prepare the private course package. Then run `node --env-file=.env.local scripts/import-course.mjs <project-ref>` with Database write access to import it into Coach. The import verifies all document counts before switching the active revision. Supabase holds the private assessment data and keys. GitHub and the Azure frontend receive only app source or static assets. Original recordings, PDFs, and full transcripts remain in the local course folder.
 
-The signed-in app includes the five-level library, lesson notes with recording timestamps, daily three-question drills, and assessment progress. The coach can find a recording note for the lesson you select and read it aloud on request. Keyed assessment responses are scored. Level 4 written and oral work and Level 5 Part A evidence are saved for review. Study and practice records leave mastery sign-off to the course review process.
+The signed-in app includes the five-level library, lesson notes with recording timestamps, daily three-question drills, and assessment progress. **Random lesson** opens a lesson from the selected level and prefers lessons you have not marked studied. The coach can find a recording note for the lesson you select and read it aloud on request. Keyed assessment responses are scored. Level 4 written and oral work and Level 5 Part A evidence are saved for review. Study and practice records leave mastery sign-off to the course review process.
 
 ## Local mode
 
