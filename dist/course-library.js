@@ -119,7 +119,9 @@ export async function mountCourseLibrary(root, request, chooseCoachLesson) {
     for (const step of index.advancement) steps.append(element('li', step.description));
     progression.append(element('summary', 'Mastery and advancement requirements'),
       element('p', 'Level 5 follows the Level 4 review and oral assessment.'), steps,
-      element('p', `Level 5 requires ${index.partA} evidenced Yes answers in Part A and ${index.partB} correct answers in Part B.`),
+      element('p', index.edition === 'personal-development'
+        ? `The original Level 5 requirements were ${index.partA} evidenced Yes answers in Part A and ${index.partB} correct answers on the full Part B test. The personal-development edition uses the retained questions for practice.`
+        : `Level 5 requires ${index.partA} evidenced Yes answers in Part A and ${index.partB} correct answers in Part B.`),
       element('p', 'Study progress and practice scores are saved here. Oral and readiness evidence requires review before mastery sign-off.'));
     panel.append(progression);
   }
@@ -210,7 +212,9 @@ export async function mountCourseLibrary(root, request, chooseCoachLesson) {
       element('p', `${answered.size} of ${set.count} answered · ${correct.length} correct · ${pending} for review`, 'muted'));
     if (criteria) panel.append(element('p', 'Generated practice threshold met.'));
     if (set.scoring) panel.append(element('p', `Target ${set.scoring.minimum_correct_answers} correct, with at least one correct per topic.`));
-    if (set.id === 'level-5-part-b' && params.view === 'assessment') panel.append(element('p', `Part B target ${index.partB} correct.`));
+    if (set.id === 'level-5-part-b' && params.view === 'assessment') {
+      panel.append(element('p', set.filtered ? 'Personal-development practice from the original Part B test.' : `Part B target ${index.partB} correct.`));
+    }
     const form = element('form');
     const group = element('fieldset');
     group.append(element('legend', `${position} of ${set.count}. ${item.prompt}`));

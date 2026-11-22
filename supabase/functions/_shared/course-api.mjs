@@ -1,6 +1,6 @@
 import { json, synthesizeSpeech } from './coach-api.mjs';
 
-const dailySets = ['level-1-generated-test', 'level-2-generated-test', 'level-3-training', 'level-4-multiple-choice', 'level-5-part-b'];
+export const dailySets = ['level-1-generated-test', 'level-2-generated-test', 'level-3-training', 'level-4-multiple-choice', 'level-5-part-b'];
 const commonWords = new Set(['about', 'what', 'where', 'which', 'when', 'could', 'would', 'should', 'this', 'that', 'with', 'from', 'have', 'does', 'tell', 'lesson', 'recording', 'please']);
 const terms = value => new Set((value.toLowerCase().match(/[a-z]{4,}/g) ?? []).filter(word => !commonWords.has(word)));
 
